@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'models/student.dart';
 import 'models/violation.dart';
 import 'models/sanction.dart';
+import 'models/student_sanction_record.dart';
 
 class AppState extends ChangeNotifier {
   AppState._private();
@@ -10,14 +11,17 @@ class AppState extends ChangeNotifier {
   final List<Student> _students = [];
   final List<Violation> _violations = [];
   final List<Sanction> _sanctions = [
-    Sanction(tingkat: 'Ringan', keterangan: 'Surat peringatan ringan', minPoin: 1, maxPoin: 4),
-    Sanction(tingkat: 'Sedang', keterangan: 'Kerja bakti sekolah', minPoin: 5, maxPoin: 9),
-    Sanction(tingkat: 'Berat', keterangan: 'Pemanggilan orang tua siswa', minPoin: 10, maxPoin: 999),
+    Sanction(id: 1, tingkat: 'Ringan', keterangan: 'Surat peringatan ringan', minPoin: 1, maxPoin: 4),
+    Sanction(id: 2, tingkat: 'Sedang', keterangan: 'Kerja bakti sekolah', minPoin: 5, maxPoin: 9),
+    Sanction(id: 3, tingkat: 'Berat', keterangan: 'Pemanggilan orang tua siswa', minPoin: 10, maxPoin: 999),
   ];
+
+  final List<StudentSanctionRecord> _studentSanctionRecords = [];
 
   List<Student> get students => List.unmodifiable(_students);
   List<Violation> get violations => List.unmodifiable(_violations);
   List<Sanction> get sanctions => List.unmodifiable(_sanctions);
+  List<StudentSanctionRecord> get studentSanctionRecords => List.unmodifiable(_studentSanctionRecords);
 
   void initSampleData() {
     addViolationForFirstIfAny();
@@ -58,8 +62,8 @@ class AppState extends ChangeNotifier {
 
   void deleteStudent(int id) {
     _students.removeWhere((s) => s.id == id);
-    // remove violations for student
     _violations.removeWhere((v) => v.studentId == id);
+    _studentSanctionRecords.removeWhere((r) => r.studentId == id);
     notifyListeners();
   }
 
@@ -72,7 +76,7 @@ class AppState extends ChangeNotifier {
       poin: v.poin,
       tanggal: v.tanggal,
     );
-    _violations.insert(0, newV); // newest first
+    _violations.insert(0, newV);
     notifyListeners();
     return newV;
   }
@@ -84,27 +88,30 @@ class AppState extends ChangeNotifier {
 
   // Sanctions
   Sanction addSanction(Sanction s) {
-    final newS = Sanction(
-      tingkat: s.tingkat,
-      keterangan: s.keterangan,
-      minPoin: s.minPoin,
-      maxPoin: s.maxPoin,
-    );
+    final id = DateTime.now().millisecondsSinceEpoch;
+    final newS = s.copyWith(id: id);
     _sanctions.add(newS);
     notifyListeners();
     return newS;
   }
 
-  void updateSanction(Sanction oldS, Sanction updated) {
-    final idx = _sanctions.indexWhere((e) => e == oldS);
+  void updateSanctionById(int sanctionId, Sanction updated) {
+    final idx = _sanctions.indexWhere((e) => e.id == sanctionId);
     if (idx >= 0) {
-      _sanctions[idx] = updated;
+      _sanctions[idx] = updated.copyWith(id: sanctionId);
       notifyListeners();
     }
   }
 
+  void updateSanction(Sanction oldS, Sanction updated) {
+    if (oldS.id == null) return;
+    updateSanctionById(oldS.id!, updated);
+  }
+
   void deleteSanction(Sanction s) {
-    _sanctions.removeWhere((e) => e == s);
+    if (s.id == null) return;
+    _sanctions.removeWhere((e) => e.id == s.id);
+    _studentSanctionRecords.removeWhere((r) => r.sanctionId == s.id);
     notifyListeners();
   }
 
@@ -116,13 +123,30 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  // Student-Sanction records (per-student status for a sanction)
+  StudentSanctionRecord? getStudentSanctionRecord({required int sanctionId, required int studentId}) {
+    try {
+      return _studentSanctionRecords.firstWhere((r) => r.sanctionId == sanctionId && r.studentId == studentId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void setStudentSanctionStatus({required int sanctionId, required int studentId, required StudentSanctionStatus status}) {
+    final idx = _studentSanctionRecords.indexWhere((r) => r.sanctionId == sanctionId && r.studentId == studentId);
+    if (idx >= 0) {
+      _studentSanctionRecords[idx] = _studentSanctionRecords[idx].copyWith(status: status);
+    } else {
+      _studentSanctionRecords.add(StudentSanctionRecord(sanctionId: sanctionId, studentId: studentId, status: status));
+    }
+    notifyListeners();
+  }
+
   // helpers
   int totalViolationsCount() => _violations.length;
 
   int totalPointsForStudent(int studentId) {
-    return _violations
-        .where((v) => v.studentId == studentId)
-        .fold(0, (a, b) => a + b.poin);
+    return _violations.where((v) => v.studentId == studentId).fold(0, (a, b) => a + b.poin);
   }
 
   Student? findStudentById(int id) {
@@ -137,7 +161,7 @@ class AppState extends ChangeNotifier {
   void clearAll() {
     _students.clear();
     _violations.clear();
-    // keep _sanctions as defaults; remove below line to clear sanctions as well
+    _studentSanctionRecords.clear();
     notifyListeners();
   }
 }
