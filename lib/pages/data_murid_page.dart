@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../app_state.dart';
 import '../models/student.dart';
+import '../models/student_sanction_record.dart';
+import '../models/sanction.dart';
 
 class DataMuridPage extends StatefulWidget {
   const DataMuridPage({super.key});
@@ -45,6 +47,15 @@ class _DataMuridPageState extends State<DataMuridPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Murid "${s.name}" dihapus')));
   }
 
+  Map<StudentSanctionStatus, int> _countsForStudent(int studentId) {
+    final recs = AppState.instance.studentSanctionRecords.where((r) => r.studentId == studentId);
+    final Map<StudentSanctionStatus, int> m = {for (var v in StudentSanctionStatus.values) v: 0};
+    for (final r in recs) {
+      m[r.status] = (m[r.status] ?? 0) + 1;
+    }
+    return m;
+  }
+
   @override
   Widget build(BuildContext context) {
     final students = AppState.instance.students;
@@ -72,11 +83,16 @@ class _DataMuridPageState extends State<DataMuridPage> {
                         final pts = AppState.instance.totalPointsForStudent(s.id!);
                         final sanction = AppState.instance.getSanctionForPoints(pts);
 
+                        final counts = _countsForStudent(s.id!);
+                        final pending = counts[StudentSanctionStatus.pending] ?? 0;
+                        final applied = counts[StudentSanctionStatus.applied] ?? 0;
+                        final reviewed = counts[StudentSanctionStatus.reviewed] ?? 0;
+
                         Color? tileColor;
                         if (sanction != null) {
-                          tileColor = sanction.tingkat == 'Berat'
+                          tileColor = sanction.tingkat.toLowerCase().contains('berat')
                               ? Colors.red.shade50
-                              : sanction.tingkat == 'Sedang'
+                              : sanction.tingkat.toLowerCase().contains('sedang')
                                   ? Colors.orange.shade50
                                   : Colors.yellow.shade50;
                         }
@@ -88,23 +104,49 @@ class _DataMuridPageState extends State<DataMuridPage> {
                             title: Text(s.name),
                             subtitle: Text('Kelas: ${s.kelas}\nPoin: $pts'),
                             isThreeLine: true,
-                            trailing: Row(
+                            trailing: Column(
                               mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 if (sanction != null)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    margin: const EdgeInsets.only(right: 8),
+                                    margin: const EdgeInsets.only(bottom: 6),
                                     decoration: BoxDecoration(
                                       color: Colors.indigo.shade700,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      sanction.tingkat,
+                                      '${sanction.tingkat}',
                                       style: const TextStyle(color: Colors.white, fontSize: 12),
                                     ),
                                   ),
-                                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _remove(s.id!)),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (pending > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        margin: const EdgeInsets.only(right: 4),
+                                        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
+                                        child: Text('P:$pending', style: const TextStyle(fontSize: 11)),
+                                      ),
+                                    if (applied > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        margin: const EdgeInsets.only(right: 4),
+                                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                                        child: Text('A:$applied', style: const TextStyle(fontSize: 11)),
+                                      ),
+                                    if (reviewed > 0)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+                                        child: Text('R:$reviewed', style: const TextStyle(fontSize: 11)),
+                                      ),
+                                    IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _remove(s.id!)),
+                                  ],
+                                )
                               ],
                             ),
                           ),
