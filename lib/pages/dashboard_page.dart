@@ -104,9 +104,14 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(height: 8),
               if (topStudent != null)
                 ListTile(
-                  leading: const Icon(Icons.star, color: Colors.amber),
-                  title: Text(topStudent.name),
-                  subtitle: Text('Kelas: ${topStudent.kelas} • Poin: ${AppState.instance.totalPointsForStudent(topStudent.id!)}'),
+                  leading: const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+                  title: Text(
+                    topStudent.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Kelas: ${topStudent.kelas} • Poin: ${AppState.instance.totalPointsForStudent(topStudent.id!)}',
+                  ),
                   trailing: _studentStatusBadge(topStudent.id!),
                 )
               else
