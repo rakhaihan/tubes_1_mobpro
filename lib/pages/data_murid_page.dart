@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../app_state.dart';
 import '../models/student.dart';
 import '../models/student_sanction_record.dart';
-import '../models/sanction.dart';
 
 class DataMuridPage extends StatefulWidget {
   const DataMuridPage({super.key});
