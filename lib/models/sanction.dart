@@ -1,5 +1,4 @@
 class Sanction {
-<<<<<<< HEAD
   final int? id;
   final String tingkat;
   final String keterangan;
@@ -8,20 +7,11 @@ class Sanction {
 
   Sanction({
     this.id,
-=======
-  String tingkat;
-  String keterangan;
-  int minPoin;
-  int maxPoin;
-
-  Sanction({
->>>>>>> origin/jack
     required this.tingkat,
     required this.keterangan,
     required this.minPoin,
     required this.maxPoin,
   });
-<<<<<<< HEAD
 
   Sanction copyWith({
     int? id,
@@ -38,6 +28,4 @@ class Sanction {
       maxPoin: maxPoin ?? this.maxPoin,
     );
   }
-=======
->>>>>>> origin/jack
 }
