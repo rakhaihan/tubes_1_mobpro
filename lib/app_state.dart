@@ -103,6 +103,11 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  void updateSanction(Sanction oldS, Sanction updated) {
+    if (oldS.id == null) return;
+    updateSanctionById(oldS.id!, updated);
+  }
+
   void deleteSanction(Sanction s) {
     if (s.id == null) return;
     _sanctions.removeWhere((e) => e.id == s.id);
@@ -133,6 +138,7 @@ class AppState extends ChangeNotifier {
       _studentSanctionRecords[idx] = _studentSanctionRecords[idx].copyWith(status: status);
     } else {
       _studentSanctionRecords.add(StudentSanctionRecord(sanctionId: sanctionId, studentId: studentId, status: status));
+    }
     notifyListeners();
   }
 
@@ -144,6 +150,8 @@ class AppState extends ChangeNotifier {
   }
 
   Student? findStudentById(int id) {
+    try {
+      return _students.firstWhere((s) => s.id == id);
     } catch (e) {
       return null;
     }
