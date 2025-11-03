@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     return const MaterialApp(
       home: Scaffold(
         body: Center(
@@ -24,15 +25,20 @@ class MyApp extends StatelessWidget {
 =======
 =======
 >>>>>>> origin/jack
+=======
+>>>>>>> origin/raihan
     return MaterialApp(
       title: 'Catatan Pelanggaran (Flutter)',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: false, primarySwatch: Colors.indigo),
       home: const LoginPage(),
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> Rakha
 =======
 >>>>>>> origin/jack
+=======
+>>>>>>> origin/raihan
     );
   }
 }
