@@ -11,40 +11,14 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text("d"),
-        ),
-      ),
-=======
-=======
->>>>>>> origin/jack
-=======
->>>>>>> origin/raihan
-=======
->>>>>>> origin/azki
     return MaterialApp(
       title: 'Catatan Pelanggaran (Flutter)',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: false, primarySwatch: Colors.indigo),
       home: const LoginPage(),
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> Rakha
-=======
->>>>>>> origin/jack
-=======
->>>>>>> origin/raihan
-=======
->>>>>>> origin/azki
     );
   }
 }
